@@ -11,7 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.whatsapp.adapters.ViewPagerAdapter
 import com.example.whatsapp.databinding.ActivityMainBinding
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -38,6 +40,23 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         inicializarToolbar()
+        inicializarNavegacaoAbas()
+    }
+
+    private fun inicializarNavegacaoAbas() {
+
+        val tabLayout = binding.tabLayoutPrincipal
+        val viewPager = binding.viewPagerPrincipal
+
+        //Adapter
+        val abas = listOf("CONVERSAS", "CONTATOS")
+        viewPager.adapter = ViewPagerAdapter(
+         abas,   supportFragmentManager, lifecycle
+        )
+        tabLayout.isTabIndicatorFullWidth = true
+        TabLayoutMediator(tabLayout, viewPager){  aba, posicao ->
+            aba.text = abas[posicao]
+        }.attach()
     }
 
     private fun inicializarToolbar() {
