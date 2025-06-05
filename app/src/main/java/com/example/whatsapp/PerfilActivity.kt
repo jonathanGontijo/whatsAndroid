@@ -2,6 +2,7 @@ package com.example.whatsapp
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,12 +13,22 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.whatsapp.databinding.ActivityCadastroBinding
 import com.example.whatsapp.databinding.ActivityPerfilBinding
 import com.example.whatsapp.utils.exibirMensagem
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class PerfilActivity : AppCompatActivity() {
 
     private val binding by lazy {
         ActivityPerfilBinding.inflate( layoutInflater )
     }
+    private val firebaseAuth by lazy {
+        FirebaseAuth.getInstance()
+    }
+    private val storage by lazy {
+        FirebaseStorage.getInstance()
+    }
+    
     private var temPermissaoCamera = false
     private var temPermissaoGaleria = false
 
@@ -26,10 +37,13 @@ class PerfilActivity : AppCompatActivity() {
     ){ uri ->
         if (uri != null){
             binding.imagePerfil.setImageURI(uri)
+            uploadImageStorage(uri)
         }else{
             exibirMensagem("Nenhuma mensagem selecionada")
         }
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +51,24 @@ class PerfilActivity : AppCompatActivity() {
         inicializarToolbar()
         solicitarPermissoes()
         inicializarEventosClique()
+    }
+
+    private fun uploadImageStorage(uri: Uri) {
+        val idUsuario = firebaseAuth.currentUser?.uid
+        if (idUsuario !=null) {
+
+            storage
+                .getReference("fotos")
+                .child("usuarios")
+                .child("id")
+                .child("perfil.jpg")
+                .putFile(uri)
+                .addOnCompleteListener {
+                    exibirMensagem("Sucesso ao fazer upload da imagem")
+                }.addOnFailureListener {
+                    exibirMensagem("Erro ao fazer upload da image")
+                }
+        }
     }
 
     private fun inicializarEventosClique() {
