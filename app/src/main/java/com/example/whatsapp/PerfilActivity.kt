@@ -16,6 +16,7 @@ import com.example.whatsapp.utils.exibirMensagem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
 
 class PerfilActivity : AppCompatActivity() {
 
@@ -54,6 +55,35 @@ class PerfilActivity : AppCompatActivity() {
         inicializarToolbar()
         solicitarPermissoes()
         inicializarEventosClique()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        recuperarDadosIniciaisUsuarios()
+    }
+
+    private fun recuperarDadosIniciaisUsuarios() {
+        val idUsuario = firebaseAuth.currentUser?.uid
+
+        if (idUsuario != null) {
+            firestore.collection("usuarios")
+                .document(idUsuario)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val dadosUsuarios = documentSnapshot.data
+                    if (dadosUsuarios != null){
+                        val nome = dadosUsuarios["nome"] as String
+                        val foto = dadosUsuarios["foto"] as String
+
+                        binding.editNomePerfil.setText(nome)
+                        if (foto.isNotEmpty()){
+                            Picasso.get()
+                                .load(foto)
+                                .into(binding.imagePerfil)
+                        }
+                    }
+                }
+        }
     }
 
     private fun uploadImageStorage(uri: Uri) {

@@ -59,6 +59,9 @@ dependencies {
     //storage
     implementation("com.google.firebase:firebase-storage")
 
+    //picasso
+    implementation("com.squareup.picasso:picasso:2.8")
+
 
 
     implementation(libs.androidx.core.ktx)
