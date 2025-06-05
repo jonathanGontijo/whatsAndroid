@@ -28,6 +28,9 @@ class PerfilActivity : AppCompatActivity() {
     private val storage by lazy {
         FirebaseStorage.getInstance()
     }
+    private val firestore by lazy {
+        FirebaseFirestore.getInstance()
+    }
     
     private var temPermissaoCamera = false
     private var temPermissaoGaleria = false
@@ -63,12 +66,32 @@ class PerfilActivity : AppCompatActivity() {
                 .child("id")
                 .child("perfil.jpg")
                 .putFile(uri)
-                .addOnCompleteListener {
+                .addOnSuccessListener { task ->
                     exibirMensagem("Sucesso ao fazer upload da imagem")
+                    task.metadata
+                        ?.reference
+                        ?.downloadUrl
+                        ?.addOnSuccessListener{ url ->
+                            val dados = mapOf(
+                                "foto" to url.toString()
+                            )
+                            atualizarDadosPerfil(idUsuario, dados)
+                    }
                 }.addOnFailureListener {
                     exibirMensagem("Erro ao fazer upload da image")
                 }
         }
+    }
+
+    private fun atualizarDadosPerfil(idUsuario: String, dados: Map<String, String>){
+        firestore
+            .collection("usuarios")
+            .document(idUsuario).update(dados)
+            .addOnSuccessListener {
+                exibirMensagem("Sucesso ao atualizar perfil")
+            }.addOnFailureListener {
+                exibirMensagem("Error ao atualizar o perfil")
+            }
     }
 
     private fun inicializarEventosClique() {
@@ -77,6 +100,22 @@ class PerfilActivity : AppCompatActivity() {
                 gerenciadorGaleria.launch("image/*")
             }else{
                 exibirMensagem("Não tem permissão para acessar a galeria")
+            }
+        }
+
+        binding.btnAtualizarPerfil.setOnClickListener {
+            val nomeUsuario = binding.editNomePerfil.text.toString()
+            if (nomeUsuario.isNotEmpty()){
+               val idUsuario = firebaseAuth.currentUser?.uid
+                if (idUsuario !=null){
+                    val dados = mapOf(
+                        "nome" to nomeUsuario
+                    )
+                    atualizarDadosPerfil(idUsuario, dados)
+                }
+
+            }else{
+                exibirMensagem("Preencha o nome para atualizar")
             }
         }
     }
