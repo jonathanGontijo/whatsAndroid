@@ -1,4 +1,4 @@
-package com.example.whatsapp
+package com.example.whatsapp.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.whatsapp.R
 import com.example.whatsapp.adapters.ViewPagerAdapter
 import com.example.whatsapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator

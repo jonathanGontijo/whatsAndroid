@@ -1,16 +1,12 @@
-package com.example.whatsapp
+package com.example.whatsapp.activities
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.whatsapp.databinding.ActivityCadastroBinding
 import com.example.whatsapp.databinding.ActivityPerfilBinding
 import com.example.whatsapp.utils.exibirMensagem
 import com.google.firebase.auth.FirebaseAuth
@@ -23,6 +19,9 @@ class PerfilActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityPerfilBinding.inflate( layoutInflater )
     }
+    private var temPermissaoCamera = false
+    private var temPermissaoGaleria = false
+
     private val firebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
@@ -32,22 +31,17 @@ class PerfilActivity : AppCompatActivity() {
     private val firestore by lazy {
         FirebaseFirestore.getInstance()
     }
-    
-    private var temPermissaoCamera = false
-    private var temPermissaoGaleria = false
 
     private val gerenciadorGaleria = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ){ uri ->
-        if (uri != null){
-            binding.imagePerfil.setImageURI(uri)
-            uploadImageStorage(uri)
+        if( uri != null ){
+            binding.imagePerfil.setImageURI( uri )
+            uploadImagemStorage( uri )
         }else{
-            exibirMensagem("Nenhuma mensagem selecionada")
+            exibirMensagem("Nenhuma imagem selecionada")
         }
     }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,90 +58,116 @@ class PerfilActivity : AppCompatActivity() {
 
     private fun recuperarDadosIniciaisUsuarios() {
         val idUsuario = firebaseAuth.currentUser?.uid
+        if( idUsuario != null ){
 
-        if (idUsuario != null) {
-            firestore.collection("usuarios")
-                .document(idUsuario)
+            firestore
+                .collection("usuarios")
+                .document( idUsuario )
                 .get()
                 .addOnSuccessListener { documentSnapshot ->
+
                     val dadosUsuarios = documentSnapshot.data
-                    if (dadosUsuarios != null){
+                    if( dadosUsuarios != null ){
+
                         val nome = dadosUsuarios["nome"] as String
                         val foto = dadosUsuarios["foto"] as String
 
-                        binding.editNomePerfil.setText(nome)
-                        if (foto.isNotEmpty()){
+                        binding.editNomePerfil.setText( nome )
+                        if( foto.isNotEmpty() ){
                             Picasso.get()
-                                .load(foto)
-                                .into(binding.imagePerfil)
+                                .load( foto )
+                                .into( binding.imagePerfil )
                         }
+
                     }
+
                 }
+
         }
+
     }
 
-    private fun uploadImageStorage(uri: Uri) {
+    private fun uploadImagemStorage(uri: Uri) {
+
+        // fotos -> usuarios -> idUsuario -> perfil.jpg
         val idUsuario = firebaseAuth.currentUser?.uid
-        if (idUsuario !=null) {
+        if( idUsuario != null ){
 
             storage
                 .getReference("fotos")
                 .child("usuarios")
-                .child("id")
+                .child(idUsuario)
                 .child("perfil.jpg")
-                .putFile(uri)
+                .putFile( uri )
                 .addOnSuccessListener { task ->
+
                     exibirMensagem("Sucesso ao fazer upload da imagem")
                     task.metadata
                         ?.reference
                         ?.downloadUrl
-                        ?.addOnSuccessListener{ url ->
+                        ?.addOnSuccessListener { url ->
+
                             val dados = mapOf(
                                 "foto" to url.toString()
                             )
-                            atualizarDadosPerfil(idUsuario, dados)
-                    }
+                            atualizarDadosPerfil( idUsuario, dados )
+
+                        }
+
                 }.addOnFailureListener {
-                    exibirMensagem("Erro ao fazer upload da image")
+                    exibirMensagem("Erro ao fazer upload da imagem")
                 }
+
         }
+
+
     }
 
-    private fun atualizarDadosPerfil(idUsuario: String, dados: Map<String, String>){
+    private fun atualizarDadosPerfil(idUsuario: String, dados: Map<String, String>) {
+
         firestore
             .collection("usuarios")
-            .document(idUsuario).update(dados)
+            .document( idUsuario )
+            .update( dados )
             .addOnSuccessListener {
-                exibirMensagem("Sucesso ao atualizar perfil")
-            }.addOnFailureListener {
-                exibirMensagem("Error ao atualizar o perfil")
+                exibirMensagem("Sucesso ao atualizar perfil!")
             }
+            .addOnFailureListener {
+                exibirMensagem("Erro ao atualizar perfil")
+            }
+
     }
 
     private fun inicializarEventosClique() {
-        binding.fabSelecionar.setOnClickListener{
-            if (temPermissaoGaleria){
+
+        binding.fabSelecionar.setOnClickListener {
+            if( temPermissaoGaleria ){
                 gerenciadorGaleria.launch("image/*")
             }else{
-                exibirMensagem("Não tem permissão para acessar a galeria")
+                exibirMensagem("Não tem permissão para acessar galeria")
+                solicitarPermissoes()
             }
         }
 
         binding.btnAtualizarPerfil.setOnClickListener {
+
             val nomeUsuario = binding.editNomePerfil.text.toString()
-            if (nomeUsuario.isNotEmpty()){
-               val idUsuario = firebaseAuth.currentUser?.uid
-                if (idUsuario !=null){
+            if( nomeUsuario.isNotEmpty() ){
+
+                val idUsuario = firebaseAuth.currentUser?.uid
+                if( idUsuario != null ){
                     val dados = mapOf(
                         "nome" to nomeUsuario
                     )
-                    atualizarDadosPerfil(idUsuario, dados)
+                    atualizarDadosPerfil( idUsuario, dados )
                 }
 
             }else{
                 exibirMensagem("Preencha o nome para atualizar")
             }
+
         }
+
     }
 
     private fun solicitarPermissoes() {
