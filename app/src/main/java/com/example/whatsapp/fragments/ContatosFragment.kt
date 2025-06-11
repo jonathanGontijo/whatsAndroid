@@ -6,7 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.whatsapp.R
+import com.example.whatsapp.adapters.ContatosAdapter
 import com.example.whatsapp.databinding.ActivityPerfilBinding
 import com.example.whatsapp.databinding.FragmentContatosBinding
 import com.example.whatsapp.model.Usuario
@@ -20,6 +23,8 @@ class ContatosFragment : Fragment() {
 
     private lateinit var binding: FragmentContatosBinding
     private lateinit var  eventoSnapshot: ListenerRegistration
+    private lateinit var  contatosAdapter: ContatosAdapter
+
     private val firebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
@@ -42,6 +47,15 @@ class ContatosFragment : Fragment() {
             inflater, container, false
         )
 
+        contatosAdapter = ContatosAdapter()
+        binding.rvContatos.adapter = contatosAdapter
+        binding.rvContatos.layoutManager = LinearLayoutManager(context)
+        binding.rvContatos.addItemDecoration(
+            DividerItemDecoration(
+                context, LinearLayoutManager.VERTICAL
+            )
+        )
+
         return  binding.root
 
     }
@@ -60,19 +74,23 @@ class ContatosFragment : Fragment() {
 
                 val documentos = querySnapshot?.documents
                 documentos?.forEach { documentSnapshot ->
+                    val idUsuarioLogado = firebaseAuth.currentUser?.uid
 
                     val usuario = documentSnapshot.toObject(Usuario:: class.java)
-                    if (usuario != null){
-                        val idUsuarioLogado = firebaseAuth.currentUser?.uid
-                        if (idUsuarioLogado != null){
+                    if (usuario != null && idUsuarioLogado != null){
+
                             if (idUsuarioLogado != usuario.id){
                                 listaContatos.add(usuario)
                             }
-                        }
+
                     }
                 }
 
                 //Lista de contatos (atualizar o RecycleView)
+                if(listaContatos.isNotEmpty()){
+                    contatosAdapter.adicionarLista(listaContatos)
+
+                }
             }
     }
 
