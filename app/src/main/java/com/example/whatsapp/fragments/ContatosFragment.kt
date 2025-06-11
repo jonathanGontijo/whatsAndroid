@@ -15,7 +15,7 @@ import com.example.whatsapp.adapters.ContatosAdapter
 import com.example.whatsapp.databinding.ActivityPerfilBinding
 import com.example.whatsapp.databinding.FragmentContatosBinding
 import com.example.whatsapp.model.Usuario
-import com.example.whatsapp.utils.Constants
+import com.example.whatsapp.utils.Constantes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -48,7 +48,7 @@ class ContatosFragment : Fragment() {
         contatosAdapter = ContatosAdapter{ usuario ->
             val intent = Intent(context, MensagensActivity::class.java)
             intent.putExtra("dadosDestinatario", usuario)
-            intent.putExtra("origem", Constants.ORIGEM_CONTATO)
+            intent.putExtra("origem", Constantes.ORIGEM_CONTATO)
             startActivity( intent)
         }
         binding.rvContatos.adapter = contatosAdapter
