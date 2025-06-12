@@ -12,14 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.whatsapp.R
 import com.example.whatsapp.activities.MensagensActivity
 import com.example.whatsapp.adapters.ContatosAdapter
-import com.example.whatsapp.databinding.ActivityPerfilBinding
 import com.example.whatsapp.databinding.FragmentContatosBinding
 import com.example.whatsapp.model.Usuario
 import com.example.whatsapp.utils.Constantes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.storage.FirebaseStorage
+
 
 
 class ContatosFragment : Fragment() {
