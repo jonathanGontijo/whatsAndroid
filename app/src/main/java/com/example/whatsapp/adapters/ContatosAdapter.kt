@@ -2,6 +2,7 @@ package com.example.whatsapp.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.whatsapp.databinding.ItemContatosBinding
@@ -20,7 +21,7 @@ class ContatosAdapter(
 
     inner class ContatosViewHolder(
         private val binding: ItemContatosBinding
-    ) : ViewHolder( binding.root ){
+    ) : RecyclerView.ViewHolder( binding.root ){
 
         fun bind( usuario: Usuario ){
 
